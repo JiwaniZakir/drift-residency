@@ -463,7 +463,7 @@ export function App() {
               <span className="font-display text-lg text-ink lowercase">drift.</span>
               <div className="flex gap-4 text-ink-muted font-mono text-[10px] uppercase tracking-[0.3em]">
                 <a href="https://x.com/drifthousesf" target="_blank" rel="noopener noreferrer" className="hover:text-ink">x</a>
-                <a href="https://www.linkedin.com/company/drifthouse/" target="_blank" rel="noopener noreferrer" className="hover:text-ink">linkedin</a>
+                <a href="https://instagram.com/drifthousesf" target="_blank" rel="noopener noreferrer" className="hover:text-ink">instagram</a>
               </div>
             </div>
           </footer>

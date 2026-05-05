@@ -34,8 +34,8 @@ export function installConsoleBanner(): void {
         cyan, muted, cyan, muted, cyan, muted, cyan, muted
       );
     },
-    apply()  { window.location.href = 'mailto:hello@drifthouse.sf?subject=Cohort 01 application'; },
-    invest() { window.location.href = 'mailto:hello@drifthouse.sf?subject=Backing Drift'; },
+    apply()  { window.location.href = 'mailto:support@driftnation.xyz?subject=Cohort 01 application'; },
+    invest() { window.location.href = 'mailto:support@driftnation.xyz?subject=Backing Drift'; },
     cohort() {
       // eslint-disable-next-line no-console
       console.log('%cCohort 01 — five spots — san francisco — applications open.', cyan);
