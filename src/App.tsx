@@ -1,18 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   installConsoleBanner,
   installKonami,
   flashRaveMode,
 } from './easterEggs';
-
-/* ============================================================
- * Plain black. Three voices:
- *   - Lacquer for body + numbered list
- *   - Instrument Serif italic for the tagline
- *   - System mono uppercase for section labels
- * Bigger gaps between chunks, no concrete texture.
- * ============================================================ */
 
 function CursorDot() {
   const ref = useRef<HTMLDivElement>(null);
@@ -82,6 +74,44 @@ function Pill({ href, children, variant = 'primary' }: {
   );
 }
 
+function Tagline() {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      className="relative cursor-default select-none"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <AnimatePresence mode="wait">
+        {!hovered ? (
+          <motion.p
+            key="stories"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.3 }}
+            className="font-serif italic text-2xl md:text-4xl text-ink leading-none"
+          >
+            where stories unfold.
+          </motion.p>
+        ) : (
+          <motion.p
+            key="sf"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.3 }}
+            className="font-serif italic text-2xl md:text-4xl text-ink leading-none"
+          >
+            san francisco.
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function Logo({ onTripleClick }: { onTripleClick?: () => void }) {
   const [clicks, setClicks] = useState(0);
   useEffect(() => {
@@ -133,7 +163,7 @@ export function App() {
       <div className="max-w-2xl mx-auto px-5 md:px-6 relative z-10">
 
         {!isEmbed && (
-          <header className="pt-6 md:pt-10 pb-0 text-center">
+          <header className="pt-16 md:pt-24 pb-16 md:pb-20 text-center">
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -141,13 +171,11 @@ export function App() {
               className="flex flex-col items-center"
             >
               <Logo onTripleClick={flashRaveMode} />
-              <p className="mt-8 font-serif italic text-2xl md:text-4xl text-ink leading-none">
-                where stories unfold.
-              </p>
-              <p className="mt-4 text-ink-muted text-[13px] md:text-[14px] max-w-md">
+              <div className="mt-10 md:mt-14">
+                <Tagline />
+              </div>
+              <p className="mt-5 text-ink-muted text-[13px] md:text-[14px] max-w-md">
                 a residency for storyteller-founders.
-                <br className="hidden md:inline" />
-                san francisco · june 1 - july 31, 2026.
               </p>
             </motion.div>
           </header>
@@ -170,7 +198,7 @@ export function App() {
           <Section label="Process">
             <ol className="list-decimal list-inside space-y-2 marker:text-drift-green">
               <li>Apply with what you&apos;re already building.</li>
-              <li>Move into the house. June 1 — July 31. San Francisco.</li>
+              <li>Move into the house. June 1 - July 31. San Francisco.</li>
               <li>You build the company. We document the build. You learn to make people care.</li>
             </ol>
           </Section>
@@ -178,23 +206,23 @@ export function App() {
           <Section label="What you get">
             <dl className="space-y-2">
               <div className="flex gap-3">
-                <dt className="text-drift-green min-w-[60px]">Build —</dt>
+                <dt className="text-drift-green min-w-[60px]">Build -</dt>
                 <dd>A bedroom in the house. Nine other builders in the same kitchen.</dd>
               </div>
               <div className="flex gap-3">
-                <dt className="text-drift-green min-w-[60px]">Film —</dt>
+                <dt className="text-drift-green min-w-[60px]">Film -</dt>
                 <dd>A crew documents your eight weeks. We cut. You publish.</dd>
               </div>
               <div className="flex gap-3">
-                <dt className="text-drift-green min-w-[60px]">Learn —</dt>
+                <dt className="text-drift-green min-w-[60px]">Learn -</dt>
                 <dd>Writing, posting, and pitching from operators who built audiences first.</dd>
               </div>
               <div className="flex gap-3">
-                <dt className="text-drift-green min-w-[60px]">Live —</dt>
+                <dt className="text-drift-green min-w-[60px]">Live -</dt>
                 <dd>Investors, sponsors, and mentors take the spare rooms on weekends. You eat with them.</dd>
               </div>
               <div className="flex gap-3">
-                <dt className="text-drift-green min-w-[60px]">Meet —</dt>
+                <dt className="text-drift-green min-w-[60px]">Meet -</dt>
                 <dd>Every founder leaves with confirmed investor meetings.</dd>
               </div>
             </dl>
@@ -209,7 +237,7 @@ export function App() {
 
           <Section label="Terms">
             <dl className="space-y-1">
-              <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Dates</dt><dd>June 1 — July 31, 2026 (8 weeks)</dd></div>
+              <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Dates</dt><dd>June 1 - July 31, 2026 (8 weeks)</dd></div>
               <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Location</dt><dd>San Francisco</dd></div>
               <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Spots</dt><dd>10</dd></div>
               <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Housing</dt><dd>Covered</dd></div>
@@ -250,7 +278,6 @@ export function App() {
               <div className="flex gap-4 text-ink-muted font-mono text-[10px] uppercase tracking-[0.3em]">
                 <a href="https://x.com/drifthousesf" target="_blank" rel="noopener noreferrer" className="hover:text-ink">x</a>
                 <a href="https://www.linkedin.com/company/drifthouse/" target="_blank" rel="noopener noreferrer" className="hover:text-ink">linkedin</a>
-                <span>san francisco</span>
               </div>
             </div>
           </footer>
