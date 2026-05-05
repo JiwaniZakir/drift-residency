@@ -163,7 +163,7 @@ export function App() {
       <div className="max-w-2xl mx-auto px-5 md:px-6 relative z-10">
 
         {!isEmbed && (
-          <header className="pt-16 md:pt-24 pb-16 md:pb-20 text-center">
+          <header className="pt-16 md:pt-24 pb-10 md:pb-12 text-center">
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
