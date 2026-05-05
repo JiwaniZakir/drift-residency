@@ -164,7 +164,11 @@ function Section({ label, children }: { label?: string; children: ReactNode }) {
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.6, delay: 0.1 }}
     >
-      {label && <TypewriterLabel text={label} />}
+      {label && (
+        <div className="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.32em] text-ink-muted mb-3">
+          {label}
+        </div>
+      )}
       <div className="text-ink">{children}</div>
     </motion.section>
   );
