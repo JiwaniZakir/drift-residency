@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  background: #FFFFFF;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #FFFFFF;
+  color: #000000;
+  font-family: 'Lacquer', ui-serif, Georgia, serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  overflow-x: hidden;
+  font-size: 15px;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+}
+
+::selection {
+  background: #1AE672;
+  color: #000000;
+}
+
+a { color: inherit; text-decoration: inherit; }
+
+/* Rave-mode invert (Konami code + triple-click logo). */
+.rave { filter: invert(1) hue-rotate(180deg); transition: filter 0.2s; }
