@@ -449,7 +449,7 @@ export function App() {
                 Investors and sponsors: back the cohort, or come stay in the
                 house on a weekend with the founders.
               </p>
-              <Pill href="mailto:hello@drifthouse.sf?subject=Backing Drift" variant="ghost">
+              <Pill href="mailto:support@driftnation.xyz?subject=Backing Drift" variant="ghost">
                 Talk to us
               </Pill>
             </div>
