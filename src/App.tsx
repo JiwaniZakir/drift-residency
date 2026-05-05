@@ -1,29 +1,159 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 import {
   installConsoleBanner,
   installKonami,
+  installDriftSecret,
   flashRaveMode,
 } from './easterEggs';
 
+function ScrollProgress() {
+  const [scrollPct, setScrollPct] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight <= 0) return;
+      setScrollPct((window.scrollY / docHeight) * 100);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <div
+      className="fixed top-0 left-0 z-50 pointer-events-none"
+      style={{
+        width: '3px',
+        height: `${scrollPct}%`,
+        background: '#1AE672',
+        boxShadow: '0 0 8px rgba(26,230,114,0.6)',
+        transition: 'height 0.1s linear',
+      }}
+    />
+  );
+}
+
+function TypewriterLabel({ text }: { text: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, margin: '-60px' });
+  const [displayed, setDisplayed] = useState('');
+  const [showCursor, setShowCursor] = useState(false);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    if (!isInView || hasAnimated.current) return;
+    hasAnimated.current = true;
+    setShowCursor(true);
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setDisplayed(text.slice(0, i));
+      if (i >= text.length) {
+        clearInterval(interval);
+        setTimeout(() => setShowCursor(false), 400);
+      }
+    }, 50);
+    return () => clearInterval(interval);
+  }, [isInView, text]);
+
+  return (
+    <div
+      ref={ref}
+      className="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.32em] text-ink-muted mb-3"
+    >
+      {displayed}
+      {showCursor && <span className="animate-pulse">_</span>}
+    </div>
+  );
+}
+
 function CursorDot() {
   const ref = useRef<HTMLDivElement>(null);
+  const trailRef = useRef<HTMLDivElement>(null);
+  const dotsRef = useRef<HTMLDivElement[]>([]);
+  const dotIndexRef = useRef(0);
+  const MAX_DOTS = 20;
+
   useEffect(() => {
     if (matchMedia('(hover: none)').matches) return;
+    const trailContainer = trailRef.current;
+    if (!trailContainer) return;
+
+    for (let i = 0; i < MAX_DOTS; i++) {
+      const dot = document.createElement('div');
+      dot.style.cssText = 'position:fixed;top:0;left:0;width:3px;height:3px;border-radius:50%;background:#1AE672;pointer-events:none;opacity:0;will-change:transform,opacity;z-index:59;';
+      trailContainer.appendChild(dot);
+      dotsRef.current.push(dot);
+    }
+
     const move = (e: PointerEvent) => {
       if (ref.current) {
         ref.current.style.transform = `translate3d(${e.clientX - 4}px, ${e.clientY - 4}px, 0)`;
       }
+      const idx = dotIndexRef.current % MAX_DOTS;
+      const dot = dotsRef.current[idx];
+      if (dot) {
+        const baseOpacity = 0.3 + Math.random() * 0.3;
+        dot.style.transform = `translate3d(${e.clientX - 1.5}px, ${e.clientY - 1.5}px, 0)`;
+        dot.style.opacity = String(baseOpacity);
+        dot.style.width = '3px';
+        dot.style.height = '3px';
+        dot.style.transition = 'none';
+        void dot.offsetWidth;
+        dot.style.transition = 'opacity 600ms ease-out, width 600ms ease-out, height 600ms ease-out';
+        dot.style.opacity = '0';
+        dot.style.width = '0px';
+        dot.style.height = '0px';
+      }
+      dotIndexRef.current++;
     };
+
     window.addEventListener('pointermove', move);
-    return () => window.removeEventListener('pointermove', move);
+    return () => {
+      window.removeEventListener('pointermove', move);
+    };
   }, []);
+
   return (
-    <div
-      ref={ref}
-      className="fixed top-0 left-0 w-2 h-2 rounded-full bg-drift-green pointer-events-none z-[60]"
-    />
+    <>
+      <div ref={trailRef} className="pointer-events-none" />
+      <div
+        ref={ref}
+        className="fixed top-0 left-0 w-2 h-2 rounded-full bg-drift-green pointer-events-none z-[60]"
+      />
+    </>
   );
+}
+
+function CountUp({ target, duration = 1.5 }: { target: number; duration?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref as React.RefObject<Element>, { once: true });
+  const hasRun = useRef(false);
+  const [display, setDisplay] = useState(0);
+
+  const animate = useCallback(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
+    const start = performance.now();
+    const step = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / (duration * 1000), 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(eased * target));
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      }
+    };
+    requestAnimationFrame(step);
+  }, [target, duration]);
+
+  useEffect(() => {
+    if (isInView) animate();
+  }, [isInView, animate]);
+
+  return <span ref={ref}>{display}</span>;
 }
 
 function Section({ label, children }: { label?: string; children: ReactNode }) {
@@ -34,11 +164,7 @@ function Section({ label, children }: { label?: string; children: ReactNode }) {
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.6, delay: 0.1 }}
     >
-      {label && (
-        <div className="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.32em] text-ink-muted mb-3">
-          {label}
-        </div>
-      )}
+      {label && <TypewriterLabel text={label} />}
       <div className="text-ink">{children}</div>
     </motion.section>
   );
@@ -74,8 +200,64 @@ function Pill({ href, children, variant = 'primary' }: {
   );
 }
 
+const TAGLINE_PHRASES = [
+  "where stories unfold.",
+  "where builders collide.",
+  "where founders become storytellers.",
+  "san francisco, summer 2026.",
+];
+
 function Tagline() {
   const [hovered, setHovered] = useState(false);
+  const [idleCycling, setIdleCycling] = useState(false);
+  const [cycleIndex, setCycleIndex] = useState(0);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cycleTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    const resetIdle = () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      if (cycleTimerRef.current) {
+        clearInterval(cycleTimerRef.current);
+        cycleTimerRef.current = null;
+      }
+      setIdleCycling(false);
+      setCycleIndex(0);
+      idleTimerRef.current = setTimeout(() => {
+        setIdleCycling(true);
+      }, 10000);
+    };
+
+    resetIdle();
+    window.addEventListener('mousemove', resetIdle);
+    return () => {
+      window.removeEventListener('mousemove', resetIdle);
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      if (cycleTimerRef.current) clearInterval(cycleTimerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (idleCycling) {
+      cycleTimerRef.current = setInterval(() => {
+        setCycleIndex((prev) => (prev + 1) % TAGLINE_PHRASES.length);
+      }, 3000);
+    }
+    return () => {
+      if (cycleTimerRef.current) {
+        clearInterval(cycleTimerRef.current);
+        cycleTimerRef.current = null;
+      }
+    };
+  }, [idleCycling]);
+
+  const displayText = hovered
+    ? "san francisco."
+    : idleCycling
+      ? TAGLINE_PHRASES[cycleIndex]
+      : "where stories unfold.";
+
+  const animKey = hovered ? "hover-sf" : idleCycling ? `cycle-${cycleIndex}` : "default";
 
   return (
     <div
@@ -84,31 +266,50 @@ function Tagline() {
       onMouseLeave={() => setHovered(false)}
     >
       <AnimatePresence mode="wait">
-        {!hovered ? (
-          <motion.p
-            key="stories"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.3 }}
-            className="font-serif italic text-2xl md:text-4xl text-ink leading-none"
-          >
-            where stories unfold.
-          </motion.p>
-        ) : (
-          <motion.p
-            key="sf"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.3 }}
-            className="font-serif italic text-2xl md:text-4xl text-ink leading-none"
-          >
-            san francisco.
-          </motion.p>
-        )}
+        <motion.p
+          key={animKey}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.3 }}
+          className="font-serif italic text-2xl md:text-4xl text-ink leading-none"
+        >
+          {displayText}
+        </motion.p>
       </AnimatePresence>
     </div>
+  );
+}
+
+function PulsingApplyPill({ urgencyLevel }: { urgencyLevel: 0 | 1 | 2 }) {
+  const pulseAnimation =
+    urgencyLevel === 2
+      ? { opacity: [1, 0.85], scale: [1, 1.05] }
+      : urgencyLevel === 1
+        ? { opacity: [1, 0.85], scale: [1, 1.02] }
+        : undefined;
+
+  const pulseTransition =
+    urgencyLevel > 0
+      ? { duration: 1.5, repeat: Infinity, repeatType: 'reverse' as const, ease: 'easeInOut' as const }
+      : undefined;
+
+  const glowStyle =
+    urgencyLevel === 2
+      ? { boxShadow: '0 0 20px rgba(26,230,114,0.5)' }
+      : undefined;
+
+  return (
+    <motion.div
+      animate={pulseAnimation}
+      transition={pulseTransition}
+      style={glowStyle}
+      className="inline-block"
+    >
+      <Pill href="https://form.typeform.com/to/CSvfAnyw?utm_source=drift_whitepaper&utm_medium=website&utm_campaign=drift_cohort01_summer26">
+        Apply for Cohort 01
+      </Pill>
+    </motion.div>
   );
 }
 
@@ -140,6 +341,7 @@ function Logo({ onTripleClick }: { onTripleClick?: () => void }) {
 export function App() {
   const installedRef = useRef(false);
   const isEmbed = new URLSearchParams(window.location.search).has('embed');
+  const [urgencyLevel, setUrgencyLevel] = useState<0 | 1 | 2>(0);
 
   useEffect(() => {
     if (installedRef.current) return;
@@ -147,8 +349,22 @@ export function App() {
     if (!isEmbed) {
       installConsoleBanner();
     }
-    return installKonami(flashRaveMode);
+    const cleanupKonami = installKonami(flashRaveMode);
+    const cleanupDrift = installDriftSecret();
+    return () => {
+      cleanupKonami();
+      cleanupDrift();
+    };
   }, [isEmbed]);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setUrgencyLevel(1), 30000);
+    const t2 = setTimeout(() => setUrgencyLevel(2), 60000);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, []);
 
   useEffect(() => {
     if (isEmbed) {
@@ -159,6 +375,7 @@ export function App() {
   return (
     <div className={`relative ${isEmbed ? 'min-h-0' : 'min-h-screen'}`}>
       {!isEmbed && <CursorDot />}
+      {!isEmbed && <ScrollProgress />}
 
       <div className="max-w-2xl mx-auto px-5 md:px-6 relative z-10">
 
@@ -239,7 +456,7 @@ export function App() {
             <dl className="space-y-1">
               <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Dates</dt><dd>June 1 - July 31, 2026 (8 weeks)</dd></div>
               <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Location</dt><dd>San Francisco</dd></div>
-              <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Spots</dt><dd>10</dd></div>
+              <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Spots</dt><dd><CountUp target={10} /></dd></div>
               <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Housing</dt><dd>Covered</dd></div>
               <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Capital</dt><dd>Terms announced soon</dd></div>
             </dl>
@@ -251,9 +468,7 @@ export function App() {
                 Cohort 01 is the first one we&apos;ve ever run. Ten spots.
                 Building something you can&apos;t put down? We want you in the house.
               </p>
-              <Pill href="https://form.typeform.com/to/CSvfAnyw?utm_source=drift_whitepaper&utm_medium=website&utm_campaign=drift_cohort01_summer26">
-                Apply for Cohort 01
-              </Pill>
+              <PulsingApplyPill urgencyLevel={urgencyLevel} />
             </div>
           </Section>
 

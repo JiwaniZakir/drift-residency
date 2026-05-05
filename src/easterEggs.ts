@@ -73,3 +73,39 @@ export function flashRaveMode(): void {
   el.classList.add('rave');
   setTimeout(() => el.classList.remove('rave'), 1500);
 }
+
+export function installDriftSecret(): () => void {
+  const sequence = ['d', 'r', 'i', 'f', 't'];
+  let buf: string[] = [];
+  const handler = (e: KeyboardEvent) => {
+    buf.push(e.key.toLowerCase());
+    if (buf.length > sequence.length) buf = buf.slice(-sequence.length);
+    if (buf.length === sequence.length && buf.every((k, i) => k === sequence[i])) {
+      buf = [];
+      const overlay = document.createElement('div');
+      overlay.style.cssText =
+        'position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;' +
+        'background:radial-gradient(circle,rgba(26,230,114,0.4),transparent 70%);' +
+        'opacity:0;transition:opacity 0.4s ease;';
+      const text = document.createElement('span');
+      text.textContent = 'you found the signal.';
+      text.style.cssText =
+        "font-family:'Lacquer',cursive;font-size:2rem;color:#1AE672;opacity:0;transition:opacity 0.6s ease;";
+      overlay.appendChild(text);
+      document.body.appendChild(overlay);
+      requestAnimationFrame(() => {
+        overlay.style.opacity = '1';
+        text.style.opacity = '1';
+      });
+      setTimeout(() => {
+        overlay.style.opacity = '0';
+        text.style.opacity = '0';
+      }, 2000);
+      setTimeout(() => {
+        overlay.remove();
+      }, 2500);
+    }
+  };
+  window.addEventListener('keydown', handler);
+  return () => window.removeEventListener('keydown', handler);
+}

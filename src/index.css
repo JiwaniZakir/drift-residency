@@ -57,3 +57,35 @@ html.embed-mode ::selection {
 .embed-mode .hover\:border-ink:hover { border-color: #F5F5F2; }
 .embed-mode .border-ink\/40 { border-color: rgba(245,245,242,0.4); }
 .embed-mode .hover\:bg-ink\/5:hover { background-color: rgba(245,245,242,0.05); }
+
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 150px 150px;
+  animation: grain 8s steps(10) infinite;
+}
+
+html.embed-mode body::after {
+  display: none;
+}
+
+@keyframes grain {
+  0%, 100% { background-position: 0 0; }
+  10% { background-position: -5px -10px; }
+  20% { background-position: -15px 5px; }
+  30% { background-position: 7px -25px; }
+  40% { background-position: -5px 25px; }
+  50% { background-position: -15px 10px; }
+  60% { background-position: 15px 0; }
+  70% { background-position: 0 15px; }
+  80% { background-position: 3px -20px; }
+  90% { background-position: -10px 10px; }
+}
