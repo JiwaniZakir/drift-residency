@@ -109,40 +109,50 @@ function Logo({ onTripleClick }: { onTripleClick?: () => void }) {
 
 export function App() {
   const installedRef = useRef(false);
+  const isEmbed = new URLSearchParams(window.location.search).has('embed');
+
   useEffect(() => {
     if (installedRef.current) return;
     installedRef.current = true;
-    installConsoleBanner();
+    if (!isEmbed) {
+      installConsoleBanner();
+    }
     return installKonami(flashRaveMode);
-  }, []);
+  }, [isEmbed]);
+
+  useEffect(() => {
+    if (isEmbed) {
+      document.documentElement.classList.add('embed-mode');
+    }
+  }, [isEmbed]);
 
   return (
-    <div className="relative min-h-screen">
-      <CursorDot />
+    <div className={`relative ${isEmbed ? 'min-h-0' : 'min-h-screen'}`}>
+      {!isEmbed && <CursorDot />}
 
       <div className="max-w-2xl mx-auto px-5 md:px-6 relative z-10">
 
-        {/* Header — logo, then italic serif tagline, hugged together */}
-        <header className="pt-6 md:pt-10 pb-0 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-col items-center"
-          >
-            <Logo onTripleClick={flashRaveMode} />
-            <p className="mt-8 font-serif italic text-2xl md:text-4xl text-ink leading-none">
-              where stories unfold.
-            </p>
-            <p className="mt-4 text-ink-muted text-[13px] md:text-[14px] max-w-md">
-              a residency for storyteller-founders.
-              <br className="hidden md:inline" />
-              san francisco · june 1 — july 31, 2026.
-            </p>
-          </motion.div>
-        </header>
+        {!isEmbed && (
+          <header className="pt-6 md:pt-10 pb-0 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-col items-center"
+            >
+              <Logo onTripleClick={flashRaveMode} />
+              <p className="mt-8 font-serif italic text-2xl md:text-4xl text-ink leading-none">
+                where stories unfold.
+              </p>
+              <p className="mt-4 text-ink-muted text-[13px] md:text-[14px] max-w-md">
+                a residency for storyteller-founders.
+                <br className="hidden md:inline" />
+                san francisco · june 1 - july 31, 2026.
+              </p>
+            </motion.div>
+          </header>
+        )}
 
-        {/* Body — tighter rhythm, ~40px breaks */}
         <main className="space-y-8 md:space-y-10 pt-8 md:pt-10 pb-12">
 
           <Section label="Belief">
@@ -169,7 +179,7 @@ export function App() {
             <dl className="space-y-2">
               <div className="flex gap-3">
                 <dt className="text-drift-green min-w-[60px]">Build —</dt>
-                <dd>A bedroom in the house. Four other founders in the same kitchen.</dd>
+                <dd>A bedroom in the house. Nine other builders in the same kitchen.</dd>
               </div>
               <div className="flex gap-3">
                 <dt className="text-drift-green min-w-[60px]">Film —</dt>
@@ -201,7 +211,7 @@ export function App() {
             <dl className="space-y-1">
               <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Dates</dt><dd>June 1 — July 31, 2026 (8 weeks)</dd></div>
               <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Location</dt><dd>San Francisco</dd></div>
-              <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Spots</dt><dd>5</dd></div>
+              <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Spots</dt><dd>10</dd></div>
               <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Housing</dt><dd>Covered</dd></div>
               <div className="flex gap-3"><dt className="text-ink-muted min-w-[80px]">Capital</dt><dd>Terms announced soon</dd></div>
             </dl>
@@ -210,10 +220,10 @@ export function App() {
           <Section label="Apply">
             <div className="space-y-5">
               <p>
-                Cohort 01 is the first one we&apos;ve ever run. Five spots.
+                Cohort 01 is the first one we&apos;ve ever run. Ten spots.
                 Building something you can&apos;t put down? We want you in the house.
               </p>
-              <Pill href="mailto:hello@drifthouse.sf?subject=Cohort 01 application">
+              <Pill href="https://form.typeform.com/to/CSvfAnyw?utm_source=drift_whitepaper&utm_medium=website&utm_campaign=drift_cohort01_summer26">
                 Apply for Cohort 01
               </Pill>
             </div>
@@ -233,17 +243,18 @@ export function App() {
 
         </main>
 
-        {/* Footer */}
-        <footer className="border-t border-ink-rule">
-          <div className="py-6 flex items-baseline justify-between">
-            <span className="font-display text-lg text-ink lowercase">drift.</span>
-            <div className="flex gap-4 text-ink-muted font-mono text-[10px] uppercase tracking-[0.3em]">
-              <a href="https://x.com/drifthousesf" target="_blank" rel="noopener noreferrer" className="hover:text-ink">x</a>
-              <a href="https://www.linkedin.com/company/drifthouse/" target="_blank" rel="noopener noreferrer" className="hover:text-ink">linkedin</a>
-              <span>san francisco</span>
+        {!isEmbed && (
+          <footer className="border-t border-ink-rule">
+            <div className="py-6 flex items-baseline justify-between">
+              <span className="font-display text-lg text-ink lowercase">drift.</span>
+              <div className="flex gap-4 text-ink-muted font-mono text-[10px] uppercase tracking-[0.3em]">
+                <a href="https://x.com/drifthousesf" target="_blank" rel="noopener noreferrer" className="hover:text-ink">x</a>
+                <a href="https://www.linkedin.com/company/drifthouse/" target="_blank" rel="noopener noreferrer" className="hover:text-ink">linkedin</a>
+                <span>san francisco</span>
+              </div>
             </div>
-          </div>
-        </footer>
+          </footer>
+        )}
 
       </div>
     </div>
