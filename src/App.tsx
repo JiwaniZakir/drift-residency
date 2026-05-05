@@ -35,39 +35,6 @@ function ScrollProgress() {
   );
 }
 
-function TypewriterLabel({ text }: { text: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: '-60px' });
-  const [displayed, setDisplayed] = useState('');
-  const [showCursor, setShowCursor] = useState(false);
-  const hasAnimated = useRef(false);
-
-  useEffect(() => {
-    if (!isInView || hasAnimated.current) return;
-    hasAnimated.current = true;
-    setShowCursor(true);
-    let i = 0;
-    const interval = setInterval(() => {
-      i++;
-      setDisplayed(text.slice(0, i));
-      if (i >= text.length) {
-        clearInterval(interval);
-        setTimeout(() => setShowCursor(false), 400);
-      }
-    }, 50);
-    return () => clearInterval(interval);
-  }, [isInView, text]);
-
-  return (
-    <div
-      ref={ref}
-      className="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.32em] text-ink-muted mb-3"
-    >
-      {displayed}
-      {showCursor && <span className="animate-pulse">_</span>}
-    </div>
-  );
-}
 
 function CursorDot() {
   const ref = useRef<HTMLDivElement>(null);
